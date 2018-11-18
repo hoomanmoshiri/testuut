@@ -1,22 +1,79 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stromblom.Pong", "Stromblom.Pong\Stromblom.Pong.csproj", "{64BF00B7-01FE-4BC1-98EE-0E68A75EE903}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{64BF00B7-01FE-4BC1-98EE-0E68A75EE903}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64BF00B7-01FE-4BC1-98EE-0E68A75EE903}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64BF00B7-01FE-4BC1-98EE-0E68A75EE903}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64BF00B7-01FE-4BC1-98EE-0E68A75EE903}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-EndGlobal
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Stromblom.Pong
+{
+    public class Player
+    {
+        public string Name { get; private set; }
+        public int Y { get; set; }
+        public int X { get; set; }
+        public bool IsRightSide { get; private set; }
+        public int Points { get; set; }
+
+        public Player(string name, bool rightSide)
+        {
+            Name = name;
+            IsRightSide = rightSide;
+
+            Reset();
+
+        }
+        public void Reset()
+        {
+            Y = Console.WindowHeight / 2 + 1;
+
+            if (IsRightSide)
+                X = Console.WindowWidth - 3;
+            else
+                X = 2;
+        }
+
+        public void Draw(bool clear = false)
+        {
+            lock (Game.DrawLock)
+            {
+                if (clear)
+                {
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.ForegroundColor = ConsoleColor.Black;
+                }
+                else
+                {
+                    Console.BackgroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                var drawPosition = Y - 1;
+
+                for (int i = 0; i < 3; i++)
+                {
+                    Console.CursorLeft = X;
+                    Console.CursorTop = drawPosition + i;
+                    Console.Write("X");
+                }
+            }
+        }
+
+        public void Move(Move move)
+        {
+            var newPosition = Y + (int)move;
+            if (CanMoveTo(newPosition))
+            {
+                Draw(clear: true);
+
+                Y = newPosition;
+
+                Draw();
+            }
+        }
+
+        private bool CanMoveTo(int newPosition)
+        {
+            return newPosition + 1 < Console.WindowHeight && newPosition - 1 >= 2;
+        }
+    }
+}
